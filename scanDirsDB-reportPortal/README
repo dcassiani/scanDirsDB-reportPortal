@@ -1,0 +1,7 @@
+use Gradle to build!
+
+- run:
+gradle run
+gradle eclipse
+
+Import on Eclipse!
