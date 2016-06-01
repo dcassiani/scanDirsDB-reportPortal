@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Back Office</title>
+<link href="styles.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/style-forms.css">
+<script type="text/javascript" src="js/angular-1.2.0-rc.2/angular.js"></script>
+<script type="text/javascript" src="js/app.js"></script>
+<script>
+	angular.module('imgScanApp');
+</script>
+
+<style type="text/css">
+.load {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 88px;
+	height: 78px;
+	margin: -39px 0 0 -44px;
+	z-index: 99999;
+}
+.bg_modal {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 99998;
+}
+.view_modal {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	text-align: left;
+	z-index: 99998;
+}
+.modal {
+	visibility: hidden;
+	cursor:pointer;
+}
+div.conteudo_modal {
+	float:right;
+	margin:10px 15px 0px 0;
+	font-weight: bold;
+	line-height: 1;
+	padding: 9px 0px 9px 0px;
+	cursor:pointer;
+	color: #fff;
+	background-color:#fa3a63;
+	text-align: center;
+	border:0;
+	text-transform:uppercase;
+	position:relative;
+	font-size:12px;
+	display:block;
+	width:102px;
+}
+.conteudo_modal:hover {
+	background-color:#ff5884;
+}
+.conteudo_modal a {
+	color:#fff;
+	text-decoration:none;
+}
+
+#footer{
+	position : static;
+	bottom: 0;
+	}
+</style>
+
+</head>
+<body>
+<div id="container">
+    <div class="main" ng-app="imgScanApp" ng-controller="ImgScanControl">
+
+    <div class="titulo">Produtos sem imagens no site</div>
+    <div class="main-cinza">
+      <div class="contact">
+        <form method="post" enctype="multipart/form-data"  action="#" id="image-form">
+          <div class="three_col">
+            <div class="titulo-cadastrar"> Pesquisar:<br/>
+              <br />
+			  <select name="selItens" class="pesquisar" ng-model="filterPaging" 
+					ng-options="pagin.val as pagin.label for pagin in pagingArr" >
+			  </select>
+            </div>
+            
+			<div class="titulo-cadastrar">Campanha:<br />
+              <br />
+			  <select name="selCamp" class="pesquisar" ng-model="productList" 
+						ng-options="jsonOption.jsonName as jsonOption.label for jsonOption in json" 
+						ng-change="loadData()"> 
+			  </select>
+            </div>
+            
+			<div class="titulo-cadastrar">Tipo:<br />
+              <br />
+              <select name="selTipo" class="pesquisar" ng-model="tipoList"
+					ng-options="tipo.val as tipo.label for tipo in tipoArr" > 
+              </select>
+            </div>
+		</div>
+	
+		<span class="clear"></span>
+	
+		<div class="three_col">
+			<div class="titulo-cadastrar">Imagem:<br />
+              <br />
+              <select name="selImg" class="pesquisar" ng-model="filtroImg"
+					ng-options="img.val as img.label for img in imgArr" > 
+              </select>
+            </div>
+	
+			<div class="titulo-cadastrar">Proto:<br />
+              <br />
+			  <input type="text" ng-model="filtroCode">
+              </select>
+            </div>
+			
+            <div class="titulo-cadastrar">Nome do Produto:<br />
+              <br/>
+			  <input type="text" ng-model="filtroProd">
+            </div>
+          </div>
+          
+		  <span class="clear"></span>
+          
+			<div class="three_col titulo2">
+				<p>Campanha {{ campaign.cmpgnNumber }} de {{ campaign.cmpgnYear }} - 
+				{{ campaign.listProducts.length }} produtos,
+				{{ campaign.listSKU.length }} tipos 
+				{{ campaign.listAtrib.length }} atributos encontrados sem imagem. 
+				<br /><br />
+				Última Atualização: {{ campaign.lastMod }}</p>
+			</div>
+        </form>
+      </div>
+    </div>
+    
+    <div class="resultados">
+      <table width="940" border="0" align="center" cellpadding="4" cellspacing="4" class="linhasAlternadas" id="siteImageReportTable">
+        <thead><tr align="center" valign="middle" class="even">
+          <td width="110" height="30" align="center">Proto</td>
+          <td width="110" height="30" align="center">Tipo</td>
+          <td width="110" height="30" align="center">FullImage</td>
+          <td width="110" align="center">Thumbnail</td>
+          <td width="480" height="30" align="center">Nome do Produto</td>
+        </tr>
+		</thead>
+		<tbody>
+         <tr ng-repeat="item in campaign.listProducts | filter:{type:tipoList} | filter :{name : filtroProd}| filter :{profile : filtroCode} | imgRegex: filtroImg | limitTo: filterPaging/3 ">
+          <td height="30" align="center" style="padding-top:20px;">{{ item.profile }}</td>
+          <td align="center">{{ item.type }}</td>
+          <td align="center">{{ item.fullImage.ready?"ok":"Imagem não encontrada" }}</td>
+          <td align="center">{{ item.thumbnail.ready?"ok":"Imagem não encontrada" }}</td>
+		  <td align="center">{{ item.name }} </td>
+        </tr>
+		<tr ng-repeat="sku in campaign.listSKU | filter:{type:tipoList} | filter :{name : filtroProd} | filter :{fscode : filtroCode} | imgRegex : filtroImg | limitTo: filterPaging/3 ">
+          <td height="30" align="center" style="padding-top:20px;">{{ sku.fscode }}</td>
+          <td align="center">{{ sku.type }}</td>
+          <td align="center">{{ sku.fullImage.ready?"ok":"Imagem não encontrada" }}</td>
+          <td align="center">{{ sku.thumbnail.ready?"ok":"Imagem não encontrada" }}</td>
+		  <td align="center">{{ sku.name }}</td>
+        </tr>
+		<tr ng-repeat="attr in campaign.listAtrib | filter:{type:tipoList} | filter :{name : filtroProd} | filter :{line : filtroCode} | imgRegex : filtroImg | limitTo: filterPaging/3 ">
+          <td height="30" align="center" style="padding-top:20px;">{{ attr.line }}</td>
+          <td align="center">{{ attr.type }}</td>
+          <td align="center">{{ attr.fullImage.ready?"ok":"Imagem não encontrada" }}</td>
+          <td align="center">{{ attr.thumbnail.ready?"ok":"Imagem não encontrada" }}</td>
+		  <td align="center">{{ attr.name }}</td>
+        </tr>
+      </table>
+	  <tbody>
+
+    </div>
+  </div>
+  <!-- fim main-->
+  <div id="footer"> built by DCR</div>
+</div>
+<!-- fim container tudo-->
+</body>
+</html>
